@@ -2,7 +2,7 @@ name: Deploy Frontend
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -11,11 +11,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
-          script: /root/deploy-frontend.sh
+          script: |
+            cd /home/diaries/diaries-front
+            git pull origin master
+            cd /home/diaries
+            docker compose up -d --build frontend
+            docker compose restart nginx
