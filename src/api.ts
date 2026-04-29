@@ -2,7 +2,7 @@
 // src/api.ts
 import type {Entry} from './types';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = '/api';
 
 // GET все записи
 export async function fetchEntries(): Promise<Entry[]> {
