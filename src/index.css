@@ -237,6 +237,97 @@ header button:hover {
     background: #fff0f0;
     border-color: #e0a0a0;
 }
+
+/* К стилям добавить: */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f0eb;
+}
+
+.auth-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 24px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-card h1 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.auth-card input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 1rem;
+}
+
+.auth-card button[type="submit"] {
+    width: 100%;
+    background: #2c2820;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.auth-error {
+    background: #fee;
+    color: #c00;
+    padding: 0.75rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.auth-switch button {
+    background: none;
+    border: none;
+    color: #8b7355;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    text-decoration: underline;
+}
+
+.user-info {
+    font-size: 0.8rem;
+    color: #8b7355;
+    margin-left: 1rem;
+}
+
+.btn-logout {
+    background: transparent;
+    color: #8b7355;
+    border: 1px solid #ddd;
+    margin-left: 0.5rem;
+}
+
+.btn-logout:hover {
+    background: #fee;
+    border-color: #c00;
+    color: #c00;
+}
+
+header > div {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 /* Адаптив */
 @media (max-width: 640px) {
     body {

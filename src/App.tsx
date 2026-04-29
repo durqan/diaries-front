@@ -1,110 +1,102 @@
-import { useState, useEffect } from 'react';
-import type {Entry} from './types';
-import { fetchEntries, createEntry, updateEntry, deleteEntry } from './api';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { fetchEntries, createEntry, updateEntry, deleteEntry, getMe, logout } from './api';
 import { EntryList } from './components/EntryList';
 import { EntryForm } from './components/EntryForm';
+import { Login } from './pages/Login';
+import { PrivateRoute } from './components/PrivateRoute';
+import type {Entry} from './types';
 
-function App() {
+function AppContent() {
+    const navigate = useNavigate();
+    const [user, setUser] = useState<any>(null);
     const [entries, setEntries] = useState<Entry[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
 
     useEffect(() => {
-        let isMounted = true;
+        Promise.all([getMe(), fetchEntries()])
+            .then(([userData, entriesData]) => {
+                setUser(userData);
+                setEntries(entriesData);
+            })
+            .catch(() => navigate('/login'))
+            .finally(() => setLoading(false));
+    }, [navigate]);
 
-        const loadEntries = async () => {
-            try {
-                const data = await fetchEntries();
-                if (isMounted) setEntries(data);
-            } catch (error) {
-                console.error('Ошибка загрузки:', error);
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-
-        loadEntries();
-
-        return () => {
-            isMounted = false;
-        };
-    }, []);
-
-    // Создание
     const handleCreate = async (title: string, content: string) => {
-        try {
-            const newEntry = await createEntry(title, content);
-            setEntries([newEntry, ...entries]);
-            setShowForm(false);
-        } catch (error) {
-            console.error('Ошибка создания:', error);
-        }
+        const newEntry = await createEntry(title, content);
+        setEntries([newEntry, ...entries]);
+        setShowForm(false);
     };
 
-    // Обновление
     const handleUpdate = async (id: number, title: string, content: string) => {
-        try {
-            const updated = await updateEntry(id, title, content);
-            setEntries(entries.map(e => e.id === id ? updated : e));
-            setEditingEntry(null);
-        } catch (error) {
-            console.error('Ошибка обновления:', error);
-        }
+        const updated = await updateEntry(id, title, content);
+        setEntries(entries.map(e => e.id === id ? updated : e));
+        setEditingEntry(null);
     };
 
-    // Удаление
     const handleDelete = async (id: number) => {
-        if (!confirm('Точно удалить запись?')) return;
-        try {
-            await deleteEntry(id);
-            setEntries(entries.filter(e => e.id !== id));
-        } catch (error) {
-            console.error('Ошибка удаления:', error);
-        }
+        if (!confirm('Точно удалить?')) return;
+        await deleteEntry(id);
+        setEntries(entries.filter(e => e.id !== id));
     };
 
-    if (loading) {
-        return <div className="container"><div className="loading">Загрузка...</div></div>;
-    }
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
+    if (loading) return <div className="container">Загрузка...</div>;
 
     return (
         <div className="container">
             <header>
-                <h1>📔 Дневник</h1>
-                <button onClick={() => setShowForm(true)}>+ Новая запись</button>
+                <div>
+                    <h1>📔 Дневник</h1>
+                    <span className="user-info">{user?.username} ✨</span>
+                </div>
+                <div>
+                    <button onClick={() => setShowForm(true)}>+ Новая запись</button>
+                    <button onClick={handleLogout} className="btn-logout">🚪 Выйти</button>
+                </div>
             </header>
 
-            {/* Форма создания */}
             {showForm && (
-                <EntryForm
-                    mode="create"
-                    onSave={handleCreate}
-                    onClose={() => setShowForm(false)}
-                />
+                <EntryForm mode="create" onSave={handleCreate} onClose={() => setShowForm(false)} />
             )}
 
-            {/* Форма редактирования */}
             {editingEntry && (
                 <EntryForm
                     mode="edit"
                     entry={editingEntry}
-                    onSave={(title, content) => handleUpdate(editingEntry.id, title, content)}
+                    onSave={(t, c) => handleUpdate(editingEntry.id, t, c)}
                     onClose={() => setEditingEntry(null)}
                 />
             )}
 
-            {/* Список записей */}
             {entries.length === 0 ? (
                 <div className="empty">Пока нет записей. Напиши первую!</div>
             ) : (
-                <EntryList
-                    entries={entries}
-                    onEdit={setEditingEntry}
-                    onDelete={handleDelete}
-                />
+                <EntryList entries={entries} onEdit={setEditingEntry} onDelete={handleDelete} />
             )}
         </div>
+    );
+}
+
+function App() {
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/" element={
+                    <PrivateRoute>
+                        <AppContent />
+                    </PrivateRoute>
+                } />
+            </Routes>
+        </BrowserRouter>
     );
 }
 
