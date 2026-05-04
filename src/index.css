@@ -328,6 +328,36 @@ header > div {
     align-items: center;
     gap: 1rem;
 }
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5dfd7;
+}
+
+.pagination-btn {
+    background: #2c2820;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.pagination-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    color: #8b7355;
+    font-size: 0.9rem;
+}
 /* Адаптив */
 @media (max-width: 640px) {
     body {

@@ -1,7 +1,18 @@
+import type {Entry} from "./types.ts";
+
 const API_URL = '/api';
 
-// Хранение токена
 let authToken: string | null = null;
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    meta: {
+        total: number;
+        page: number;
+        page_size: number;
+        total_pages: number;
+    };
+}
 
 export function setAuthToken(token: string | null) {
     authToken = token;
@@ -19,7 +30,6 @@ export function getAuthToken(): string | null {
     return token;
 }
 
-// Базовый fetch с авторизацией
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
     const token = getAuthToken();
     const headers: Record<string, string> = {
@@ -30,7 +40,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Merge with existing headers
     if (options.headers) {
         const existingHeaders = options.headers as Record<string, string>;
         Object.keys(existingHeaders).forEach(key => {
@@ -41,7 +50,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
     const response = await fetch(url, { ...options, headers });
 
     if (response.status === 401) {
-        // Токен протух
         setAuthToken(null);
         window.location.href = '/login';
         throw new Error('Unauthorized');
@@ -50,7 +58,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
     return response;
 }
 
-// Аутентификация
 export async function register(username: string, email: string, password: string): Promise<{ token: string; user: any }> {
     const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
@@ -86,9 +93,8 @@ export async function getMe(): Promise<any> {
     return res.json();
 }
 
-// Записи
-export async function fetchEntries(): Promise<any[]> {
-    const res = await fetchWithAuth(`${API_URL}/entries`);
+export async function fetchEntries(page = 1, pageSize = 10): Promise<PaginatedResponse<Entry>> {
+    const res = await fetchWithAuth(`${API_URL}/entries?page=${page}&page_size=${pageSize}`);
     if (!res.ok) throw new Error('Failed to fetch entries');
     return res.json();
 }
